@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Previous code used Calco, reverting title -->
+    <title>SumUp - Calculator</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+
+    <!-- Tailwind Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- React and ReactDOM via CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+
+    <!-- Babel Standalone -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Tailwind Configuration (mostly unchanged) -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              'fredoka': ['"Fredoka One"', 'cursive'],
+              'sans': ['Poppins', 'sans-serif'],
+            },
+            colors: {
+              // Variables remain the same
+              'theme-bg': 'var(--bg-color)',
+              'theme-text': 'var(--text-color)',
+              'theme-card': 'var(--card-color)',
+              'theme-display': 'var(--display-bg-color)',
+              'theme-display-text': 'var(--display-text-color)',
+              'theme-history-text': 'var(--history-text-color)', // Added for history text
+              'theme-shadow-outer': 'var(--shadow-outer)',
+              'theme-shadow-inner': 'var(--shadow-inner)',
+              'theme-accent': 'var(--accent-color)',
+              'theme-accent-text': 'var(--accent-text-color)',
+              'theme-special': 'var(--special-color)',
+              'theme-special-text': 'var(--special-text-color)',
+            },
+            boxShadow: { // Shadows remain the same
+              'clay-main': '6px 6px 14px var(--shadow-outer), -6px -6px 12px var(--shadow-inner)',
+              'clay-button': '4px 4px 8px var(--shadow-outer), -4px -4px 6px var(--shadow-inner)',
+              'clay-button-press': '2px 2px 4px var(--shadow-outer), inset 3px 3px 5px var(--shadow-outer), inset -3px -3px 5px var(--shadow-inner)',
+              'clay-display': 'inset 4px 4px 8px var(--shadow-outer), inset -4px -4px 6px var(--shadow-inner)',
+              'clay-switch-active': 'inset 3px 3px 5px var(--shadow-outer)',
+              // Neumorphic shadow for decorative shapes (using same variables but maybe different offset/blur if needed)
+              'neumo-decor': '8px 8px 16px var(--shadow-outer), -8px -8px 14px var(--shadow-inner)',
+            },
+            borderRadius: { // Radii remain the same
+               '3xl': '1.5rem', // Added for decor shapes
+               '4xl': '2rem',
+               '5xl': '3rem',
+            },
+            keyframes: { // Animation remains the same
+                squish: { /* ... */ '0%, 100%': { transform: 'scale(1, 1)' }, '50%': { transform: 'scale(0.92, 1.05)' }, }
+            },
+            animation: { /* ... */ squish: 'squish 0.15s ease-in-out', }
+          },
+        },
+      }
+    </script>
+
+    <!-- Base CSS and Theme Variables -->
+    <style type="text/tailwindcss">
+        body {
+            @apply bg-theme-bg text-theme-text font-sans transition-colors duration-300 ease-in-out;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        #root {
+             min-height: 100vh;
+             /* Make root relative to position children absolutely */
+             @apply relative overflow-hidden; /* Prevent scrollbars from decorative elements */
+             display: flex;
+             flex-direction: column;
+        }
+
+        /* --- Updated Playful Clay Themes (using previous darker bg) --- */
+        :root { /* Theme 1: Candy Floss */
+            --bg-color: #f8dfe8;
+            --card-color: #fff5f5;
+            --display-bg-color: #ffebeb;
+            --display-text-color: #8c3a5c;
+            --history-text-color: #b36a8b;
+            --text-color: #c55f8a;
+            --shadow-outer: rgba(217, 160, 180, 0.5);
+            --shadow-inner: rgba(255, 255, 255, 0.9);
+            --accent-color: #86d4d4;
+            --accent-text-color: #ffffff;
+            --special-color: #ffd1dc;
+            --special-text-color: #c55f8a;
+        }
+        body.theme-citrus {
+            --bg-color: #fff3d1;
+            --card-color: #ffffe0;
+            --display-bg-color: #fffacd;
+            --display-text-color: #c47831;
+            --history-text-color: #ce9753;
+            --text-color: #e16913;
+            --shadow-outer: rgba(210, 180, 140, 0.5);
+            --shadow-inner: rgba(255, 255, 255, 0.9);
+            --accent-color: #90ee90;
+            --accent-text-color: #2e8b57;
+            --special-color: #ffdab9;
+            --special-text-color: #bf7229;
+        }
+        body.theme-ocean {
+            --bg-color: #d0edf3;
+            --card-color: #e6ffff;
+            --display-bg-color: #d4f1f4;
+            --display-text-color: #005f73;
+            --history-text-color: #008ca7;
+            --text-color: #0a9396;
+            --shadow-outer: rgba(142, 202, 230, 0.5);
+            --shadow-inner: rgba(255, 255, 255, 0.9);
+            --accent-color: #ee9b00;
+            --accent-text-color: #ffffff;
+            --special-color: #ade8f4;
+            --special-text-color: #005f73;
+        }
+
+        /* --- Animations & Helpers --- */
+         .button-squish:active {
+             @apply !shadow-clay-button-press;
+             animation: squish 0.15s ease-in-out;
+         }
+         .theme-dot-active {
+             @apply ring-2 ring-offset-2 ring-offset-theme-card ring-theme-accent;
+         }
+         .scroll-smooth { scroll-behavior: smooth; }
+         .no-scrollbar::-webkit-scrollbar { display: none; }
+         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+         /* --- Decorative Shape Base Style --- */
+         .decor-shape {
+            @apply absolute block bg-theme-bg shadow-neumo-decor -z-10 transition-colors duration-300 ease-in-out;
+            /* Use the same bg as body so it blends */
+         }
+
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback, useRef } = React;
+
+        // --- Calculator Logic (Unchanged) ---
+        const MAX_DISPLAY_LENGTH = 16;
+        const calculate = (num1, num2, operator) => { const number1 = parseFloat(num1); const number2 = parseFloat(num2); if (isNaN(number1) || isNaN(number2)) return NaN; switch (operator) { case '+': return number1 + number2; case '−': return number1 - number2; case '×': return number1 * number2; case '÷': return number2 === 0 ? Infinity : number1 / number2; case 'xʸ': return Math.pow(number1, number2); default: return number2; } };
+        const calculateScientific = (num, operation) => { const number = parseFloat(num); if (isNaN(number)) return NaN; switch(operation) { case 'sin': return Math.sin(number * Math.PI / 180); case 'cos': return Math.cos(number * Math.PI / 180); case 'tan': return Math.tan(number * Math.PI / 180); case 'log': return Math.log10(number); case 'ln': return Math.log(number); case '√': return Math.sqrt(number); case 'x²': return Math.pow(number, 2); case 'π': return Math.PI; case 'e': return Math.E; default: return number; } };
+        const formatNumber = (num) => { if (num === Infinity || num === -Infinity) return "Error"; if (isNaN(num)) return "Error"; let numStr = String(num); if (numStr.length > MAX_DISPLAY_LENGTH) { const precision = Math.min(MAX_DISPLAY_LENGTH - (numStr.includes('e') ? 7 : (numStr.includes('.') ? 1 : 0)), MAX_DISPLAY_LENGTH); num = parseFloat(num.toPrecision(precision)); numStr = String(num); if (numStr.length > MAX_DISPLAY_LENGTH) { num = parseFloat(num.toExponential(MAX_DISPLAY_LENGTH - 5)); numStr = String(num); } } return numStr.slice(0, MAX_DISPLAY_LENGTH); };
+
+        // --- React Components ---
+
+        function Button({ label, onClick, type = 'number', className = '' }) {
+            // Unchanged Button Component
+            const baseStyle = "flex items-center justify-center aspect-square rounded-full shadow-clay-button focus:outline-none font-medium text-xl sm:text-2xl transition-shadow duration-100 button-squish";
+            let typeStyle = ''; let textColor = '';
+            switch (type) { case 'operator': case 'sci': typeStyle = 'bg-theme-accent'; textColor = 'text-theme-accent-text'; break; case 'special': typeStyle = 'bg-theme-special'; textColor = 'text-theme-special-text'; break; case 'number': default: typeStyle = 'bg-theme-card'; textColor = 'text-theme-text'; break; }
+            return ( <button onClick={onClick} className={`${baseStyle} ${typeStyle} ${textColor} ${className}`} aria-label={label}> {label} </button> );
+        }
+
+        function Display({ history, currentValue }) {
+            // Unchanged Display Component
+            const historyRef = useRef(null);
+             useEffect(() => { if (historyRef.current) { historyRef.current.scrollTop = historyRef.current.scrollHeight; } }, [history]);
+            const getCurrentFontSize = (text) => { const length = text?.length || 0; if (length > 16) return 'text-xl'; if (length > 12) return 'text-2xl'; if (length > 9) return 'text-3xl sm:text-4xl'; return 'text-4xl sm:text-5xl'; };
+            return ( <div className="bg-theme-display shadow-clay-display rounded-3xl p-4 mb-6 flex flex-col min-h-[8rem]"> <div ref={historyRef} className="flex-grow h-20 sm:h-24 overflow-y-auto mb-2 text-right text-theme-history-text text-lg font-mono whitespace-pre-wrap scroll-smooth no-scrollbar" aria-label="Calculation History"> {history || ""} </div> <div className="min-h-[3rem] flex items-center justify-end"> <span className={`block w-full break-all text-theme-display-text font-mono text-right ${getCurrentFontSize(currentValue)} transition-all duration-100`} role="textbox" aria-label="Current Input or Result"> {currentValue} </span> </div> </div> );
+        }
+
+        function Calculator() {
+            // Unchanged Calculator State & Logic
+            const [isScientific, setIsScientific] = useState(false);
+            const [currentValue, setCurrentValue] = useState('0'); const [previousValue, setPreviousValue] = useState(null); const [operator, setOperator] = useState(null); const [waitingForOperand, setWaitingForOperand] = useState(false); const [history, setHistory] = useState(''); const [justCalculated, setJustCalculated] = useState(false);
+            const updateHistory = (text, newLine = false) => { setHistory(prev => { if (newLine) { return prev + (prev ? '\n' : '') + text; } else { return prev + (prev.endsWith(' ') || prev.endsWith('\n') || prev === '' ? '' : ' ') + text; } }); };
+            const handleClearEntry = useCallback(() => { setCurrentValue('0'); setJustCalculated(false); }, []);
+            const handleAllClear = useCallback(() => { setCurrentValue('0'); setPreviousValue(null); setOperator(null); setWaitingForOperand(false); setHistory(''); setJustCalculated(false); }, []);
+            const isAc = currentValue === '0' && !operator && !previousValue; const clearAction = isAc ? handleAllClear : handleClearEntry; const clearLabel = isAc ? 'AC' : 'C';
+            const handleNumberClick = useCallback((number) => { if (currentValue === "Error") return; if (currentValue.length >= MAX_DISPLAY_LENGTH && !waitingForOperand && !justCalculated) return; if (waitingForOperand || justCalculated) { if (justCalculated) { setHistory(''); setPreviousValue(null); } setCurrentValue(number); setWaitingForOperand(false); setJustCalculated(false); } else { const newValue = currentValue === '0' ? number : currentValue + number; setCurrentValue(newValue); } }, [currentValue, waitingForOperand, justCalculated, previousValue, history]);
+            const handleDecimalClick = useCallback(() => { if (currentValue === "Error" || currentValue.includes('.')) return; if (currentValue.length >= MAX_DISPLAY_LENGTH) return; if (waitingForOperand || justCalculated) { if (justCalculated) { setHistory(''); setPreviousValue(null); } setCurrentValue('0.'); setWaitingForOperand(false); setJustCalculated(false); } else { setCurrentValue(currentValue + '.'); } }, [currentValue, waitingForOperand, justCalculated]);
+            const handleOperatorClick = useCallback((op) => { if (currentValue === "Error") return; const currentNum = parseFloat(currentValue); if (isNaN(currentNum)) return; if (previousValue !== null && operator && !waitingForOperand) { const result = calculate(previousValue, currentNum, operator); const formattedResult = formatNumber(result); if (formattedResult === "Error") { handleAllClear(); setCurrentValue("Error"); setHistory("Error"); return; } updateHistory(`${previousValue} ${operator} ${currentValue} = ${formattedResult}`, true); setCurrentValue(formattedResult); setPreviousValue(formattedResult); } else { if (!justCalculated) { updateHistory(currentValue); } setPreviousValue(currentValue); } setOperator(op); updateHistory(op); setWaitingForOperand(true); setJustCalculated(false); }, [currentValue, previousValue, operator, waitingForOperand, justCalculated, history, handleAllClear, updateHistory]);
+            const handleEqualsClick = useCallback(() => { if (currentValue === "Error" || !operator || previousValue === null || waitingForOperand) return; const currentNum = parseFloat(currentValue); if (isNaN(currentNum)) return; const result = calculate(previousValue, currentNum, operator); const formattedResult = formatNumber(result); updateHistory(currentValue); updateHistory("="); updateHistory(formattedResult); setCurrentValue(formattedResult); setPreviousValue(null); setOperator(null); setWaitingForOperand(false); setJustCalculated(true); if (formattedResult === "Error") { setWaitingForOperand(true); setHistory(prev => prev + '\nError'); } }, [currentValue, previousValue, operator, waitingForOperand, history, updateHistory]);
+            const handleSignChange = useCallback(() => { if (currentValue === '0' || currentValue === "Error" || justCalculated) return; const newValue = currentValue.startsWith('-') ? currentValue.substring(1) : '-' + currentValue; if (newValue.length <= MAX_DISPLAY_LENGTH) { setCurrentValue(newValue); } }, [currentValue, justCalculated]);
+            const handlePercentClick = useCallback(() => { if (currentValue === "Error") return; const numericValue = parseFloat(currentValue); if (isNaN(numericValue)) return; let result; let historyUpdate = `%(${currentValue})`; if (previousValue && operator) { const percentageOfPrevious = calculate(previousValue, numericValue / 100, '×'); result = percentageOfPrevious; historyUpdate = `${numericValue}% of ${previousValue}`; } else { result = calculate(numericValue, '100', '÷'); } const formattedResult = formatNumber(result); updateHistory(historyUpdate); setCurrentValue(formattedResult); setWaitingForOperand(false); setJustCalculated(false); }, [currentValue, previousValue, operator, updateHistory]);
+            const handleScientificClick = useCallback((operation) => { let historyUpdate = `${operation}(${currentValue})`; let result; if (operation === 'π' || operation === 'e') { result = calculateScientific(null, operation); historyUpdate = operation; if (justCalculated) { setHistory(''); } } else { if (currentValue === "Error") return; result = calculateScientific(currentValue, operation); } const formattedResult = formatNumber(result); updateHistory(historyUpdate); setCurrentValue(formattedResult); setPreviousValue(null); setOperator(null); setWaitingForOperand(false); setJustCalculated(false); if (formattedResult === "Error") { setWaitingForOperand(true); setHistory(prev => prev + ' = Error'); } }, [currentValue, justCalculated, history, updateHistory]);
+
+            // Button Definitions (Unchanged)
+             const basicButtons = [ { label: clearLabel, action: clearAction, type: 'special' }, { label: '+/-', action: handleSignChange, type: 'special' }, { label: '%', action: handlePercentClick, type: 'special' }, { label: '÷', action: () => handleOperatorClick('÷'), type: 'operator' }, { label: '7', action: () => handleNumberClick('7') }, { label: '8', action: () => handleNumberClick('8') }, { label: '9', action: () => handleNumberClick('9') }, { label: '×', action: () => handleOperatorClick('×'), type: 'operator' }, { label: '4', action: () => handleNumberClick('4') }, { label: '5', action: () => handleNumberClick('5') }, { label: '6', action: () => handleNumberClick('6') }, { label: '−', action: () => handleOperatorClick('−'), type: 'operator' }, { label: '1', action: () => handleNumberClick('1') }, { label: '2', action: () => handleNumberClick('2') }, { label: '3', action: () => handleNumberClick('3') }, { label: '+', action: () => handleOperatorClick('+'), type: 'operator' }, { label: '0', action: () => handleNumberClick('0'), className: 'col-span-2 !rounded-full w-auto aspect-auto px-10' }, { label: '.', action: handleDecimalClick }, { label: '=', action: handleEqualsClick, type: 'operator' }, ];
+             const scientificButtons = [ { label: 'sin', action: () => handleScientificClick('sin'), type: 'sci' }, { label: 'cos', action: () => handleScientificClick('cos'), type: 'sci' }, { label: 'tan', action: () => handleScientificClick('tan'), type: 'sci' }, { label: 'log', action: () => handleScientificClick('log'), type: 'sci' }, { label: 'ln', action: () => handleScientificClick('ln'), type: 'sci' }, { label: '√', action: () => handleScientificClick('√'), type: 'sci' }, { label: 'x²', action: () => handleScientificClick('x²'), type: 'sci' }, { label: 'xʸ', action: () => handleOperatorClick('xʸ'), type: 'sci' }, { label: 'π', action: () => handleScientificClick('π'), type: 'sci' }, { label: 'e', action: () => handleScientificClick('e'), type: 'sci' }, ];
+
+            const gridColsClass = isScientific ? 'grid-cols-5' : 'grid-cols-4';
+            const buttonGap = 'gap-2.5 sm:gap-3 md:gap-4';
+
+            return (
+                // Calculator structure unchanged
+                <div className="bg-theme-card p-4 sm:p-5 rounded-4xl sm:rounded-5xl shadow-clay-main w-full max-w-[22rem] sm:max-w-sm md:max-w-md mx-auto">
+                    <div className="flex justify-end mb-4"> <button onClick={() => setIsScientific(!isScientific)} className="px-3 py-1 text-xs rounded-full shadow-clay-button bg-theme-special text-theme-special-text button-squish"> {isScientific ? 'Basic' : 'Sci'} </button> </div>
+                    <Display history={history} currentValue={currentValue} />
+                    <div className={`grid ${gridColsClass} ${buttonGap} mt-5`}>
+                        {isScientific && scientificButtons.map((btn) => ( <Button key={btn.label} label={btn.label} onClick={btn.action} type={btn.type} className={btn.className} /> ))}
+                        {basicButtons.map((btn) => ( <Button key={btn.label} label={btn.label} onClick={btn.action} type={btn.type} className={btn.className} /> ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // ThemeSwitcher component unchanged
+        function ThemeSwitcher({ themes, currentTheme, setTheme }) {
+          return ( <div className="flex space-x-2 p-1.5 bg-theme-card shadow-clay-button rounded-full"> {themes.map((theme) => ( <button key={theme.name} title={theme.label} onClick={() => setTheme(theme.name)} className={`w-6 h-6 rounded-full focus:outline-none transition-all duration-200 ease-in-out shadow-clay-button hover:scale-110 ${ currentTheme === theme.name ? 'theme-dot-active !shadow-clay-switch-active scale-95' : '' }`} style={{ backgroundColor: theme.color }} aria-label={`Switch to ${theme.label} theme`} /> ))} </div> );
+        }
+        // Header component unchanged
+        function Header({ children }) {
+          return ( <header className="w-full flex justify-between items-center p-4 max-w-md mx-auto mb-2 sm:mb-4"> <h1 className="text-5xl sm:text-6xl font-fredoka text-theme-text"> SumUp </h1> <div>{children}</div> </header> );
+        }
+
+        // --- Updated App Component ---
+        function App() {
+            // Theme definitions unchanged
+            const themes = [ { name: 'theme-candy', label: 'Candy', color: '#ffd1dc' }, { name: 'theme-citrus', label: 'Citrus', color: '#ffdab9' }, { name: 'theme-ocean', label: 'Ocean', color: '#ade8f4' }, ];
+            const [currentTheme, setCurrentTheme] = useState(() => { const savedTheme = localStorage.getItem('sumup-fun-clay-theme'); return themes.some(t => t.name === savedTheme) ? savedTheme : themes[0].name; });
+            useEffect(() => { document.body.className = ''; document.body.classList.add(currentTheme); localStorage.setItem('sumup-fun-clay-theme', currentTheme); }, [currentTheme]);
+
+            return (
+                 // Root container is now relative and handles main flex layout
+                 <div className="relative flex flex-col items-center justify-center min-h-screen p-4 overflow-hidden">
+                    {/* --- Decorative Neumorphic Shapes --- */}
+                    {/* Using responsive units (vw/vh) and percentages for positioning */}
+                    {/* Large Left (partially off-screen) */}
+                    <div className="decor-shape rounded-4xl w-[45vw] h-[45vw] sm:w-[35vw] sm:h-[35vw] lg:w-[30vw] lg:h-[30vw] top-[15%] left-[-20%] sm:left-[-15%] lg:left-[-10%] rotate-[-15deg] opacity-70"></div>
+                    {/* Small Left (fully visible) */}
+                    <div className="decor-shape rounded-3xl w-[20vw] h-[20vw] sm:w-[18vw] sm:h-[18vw] lg:w-[15vw] lg:h-[15vw] top-[60%] left-[5%] sm:left-[10%] lg:left-[15%] rotate-[10deg] opacity-90"></div>
+
+                     {/* Large Right (partially off-screen) */}
+                    <div className="decor-shape rounded-4xl w-[45vw] h-[45vw] sm:w-[35vw] sm:h-[35vw] lg:w-[30vw] lg:h-[30vw] bottom-[10%] right-[-20%] sm:right-[-15%] lg:right-[-10%] rotate-[20deg] opacity-70"></div>
+                     {/* Small Right (fully visible) */}
+                    <div className="decor-shape rounded-3xl w-[20vw] h-[20vw] sm:w-[18vw] sm:h-[18vw] lg:w-[15vw] lg:h-[15vw] bottom-[65%] right-[5%] sm:right-[10%] lg:right-[15%] rotate-[-15deg] opacity-90"></div>
+
+                    {/* --- Main Content (needs z-index to be above shapes) --- */}
+                    <div className="relative z-10 flex flex-col items-center w-full max-w-lg"> {/* Added wrapper with z-10 */}
+                        <Header>
+                            <ThemeSwitcher
+                                themes={themes}
+                                currentTheme={currentTheme}
+                                setTheme={setCurrentTheme}
+                            />
+                        </Header>
+                        {/* Main content area takes remaining space */}
+                        <main className="flex-grow flex items-center justify-center w-full">
+                            <Calculator /> {/* Calculator is centered */}
+                        </main>
+                        <footer className="text-center text-xs mt-6 pb-2 text-theme-text opacity-80">
+                            SumUp - Calculator
+                        </footer>
+                    </div>
+                </div>
+            );
+        }
+
+        // Render the App
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+
+    </script>
+
+</body>
+</html>
